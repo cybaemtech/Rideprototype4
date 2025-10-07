@@ -1,16 +1,39 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import RideHistoryCard from "@/components/RideHistoryCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal } from "lucide-react";
+import { Search, SlidersHorizontal, History } from "lucide-react";
 import { motion } from "framer-motion";
+import gsap from "gsap";
 
 export default function RideHistory() {
+  const pageRef = useRef<HTMLDivElement>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(".page-header", {
+        opacity: 0,
+        y: 30,
+        duration: 0.6,
+        ease: "power3.out",
+      });
+
+      gsap.from(".search-filter", {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        delay: 0.2,
+        ease: "power2.out",
+      });
+    }, pageRef);
+
+    return () => ctx.revert();
+  }, []);
 
   const allRides = [
     {
@@ -78,67 +101,95 @@ export default function RideHistory() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div ref={pageRef} className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 bg-background">
-        <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
           <motion.div
+            className="page-header"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl font-bold mb-2">Ride History</h1>
-            <p className="text-muted-foreground">
+            <div className="flex items-center gap-3 mb-2">
+              <motion.div
+                animate={{
+                  rotate: [0, 360],
+                }}
+                transition={{
+                  duration: 20,
+                  repeat: Infinity,
+                  ease: "linear",
+                }}
+              >
+                <History className="h-8 w-8 text-primary" />
+              </motion.div>
+              <h1 className="text-2xl sm:text-3xl font-bold">Ride History</h1>
+            </div>
+            <p className="text-muted-foreground text-sm sm:text-base">
               View and manage your past rides
             </p>
           </motion.div>
 
           <motion.div
+            className="search-filter"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="flex flex-col md:flex-row gap-4"
           >
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search rides..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-                data-testid="input-search-rides"
-              />
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+                <Input
+                  placeholder="Search rides..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                  data-testid="input-search-rides"
+                />
+              </div>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-full sm:w-48" data-testid="select-filter-status">
+                  <SlidersHorizontal className="h-4 w-4 mr-2 flex-shrink-0" />
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Rides</SelectItem>
+                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="cancelled">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-full md:w-48" data-testid="select-filter-status">
-                <SlidersHorizontal className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Rides</SelectItem>
-                <SelectItem value="completed">Completed</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-4"
+            className="space-y-3 sm:space-y-4"
           >
             {filteredRides.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="text-center py-12 text-muted-foreground"
+              >
+                <History className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p>No rides found matching your criteria</p>
-              </div>
+              </motion.div>
             ) : (
               filteredRides.map((ride, index) => (
                 <motion.div
                   key={ride.id}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
+                  transition={{
+                    duration: 0.3,
+                    delay: index * 0.05,
+                    type: "spring",
+                    stiffness: 100,
+                  }}
+                  whileHover={{ y: -5 }}
                 >
                   <RideHistoryCard {...ride} />
                 </motion.div>

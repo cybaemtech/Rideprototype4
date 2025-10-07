@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import WalletBalance from "@/components/WalletBalance";
@@ -15,10 +15,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { motion } from "framer-motion";
+import gsap from "gsap";
 import { useToast } from "@/hooks/use-toast";
+import { Wallet as WalletIcon } from "lucide-react";
 
 export default function Wallet() {
   const { toast } = useToast();
+  const pageRef = useRef<HTMLDivElement>(null);
   const [balance, setBalance] = useState(2500);
   const [amount, setAmount] = useState("");
   const [open, setOpen] = useState(false);
@@ -60,6 +63,35 @@ export default function Wallet() {
     },
   ]);
 
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(".page-header", {
+        opacity: 0,
+        y: 30,
+        duration: 0.6,
+        ease: "power3.out",
+      });
+
+      gsap.from(".wallet-balance-container", {
+        opacity: 0,
+        scale: 0.9,
+        duration: 0.5,
+        delay: 0.2,
+        ease: "back.out(1.5)",
+      });
+
+      gsap.from(".transactions-container", {
+        opacity: 0,
+        y: 20,
+        duration: 0.5,
+        delay: 0.3,
+        ease: "power2.out",
+      });
+    }, pageRef);
+
+    return () => ctx.revert();
+  }, []);
+
   const handleAddMoney = () => {
     const numAmount = parseFloat(amount);
     if (numAmount > 0) {
@@ -74,22 +106,38 @@ export default function Wallet() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div ref={pageRef} className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 bg-background">
-        <div className="max-w-4xl mx-auto px-4 md:px-6 lg:px-8 py-8 space-y-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6 sm:space-y-8">
           <motion.div
+            className="page-header"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <h1 className="text-3xl font-bold mb-2">My Wallet</h1>
-            <p className="text-muted-foreground">
+            <div className="flex items-center gap-3 mb-2">
+              <motion.div
+                animate={{
+                  rotateY: [0, 180, 360],
+                }}
+                transition={{
+                  duration: 3,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              >
+                <WalletIcon className="h-8 w-8 text-primary" />
+              </motion.div>
+              <h1 className="text-2xl sm:text-3xl font-bold">My Wallet</h1>
+            </div>
+            <p className="text-muted-foreground text-sm sm:text-base">
               Manage your balance and transactions
             </p>
           </motion.div>
 
           <motion.div
+            className="wallet-balance-container"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
@@ -103,14 +151,19 @@ export default function Wallet() {
                   />
                 </div>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-[90vw] sm:max-w-md">
                 <DialogHeader>
                   <DialogTitle>Add Money to Wallet</DialogTitle>
                   <DialogDescription>
                     Enter the amount you want to add to your wallet balance
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 pt-4">
+                <motion.div
+                  className="space-y-4 pt-4"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
                   <div className="space-y-2">
                     <Label htmlFor="amount">Amount</Label>
                     <Input
@@ -124,46 +177,47 @@ export default function Wallet() {
                       data-testid="input-add-amount"
                     />
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => setAmount("500")}
-                      data-testid="button-quick-50"
-                    >
-                      ₹500
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => setAmount("1000")}
-                      data-testid="button-quick-100"
-                    >
-                      ₹1000
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className="flex-1"
-                      onClick={() => setAmount("2000")}
-                      data-testid="button-quick-200"
-                    >
-                      ₹2000
-                    </Button>
+                  <div className="grid grid-cols-3 gap-2">
+                    {["500", "1000", "2000"].map((value, index) => (
+                      <motion.div
+                        key={value}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: 0.2 + index * 0.1 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button
+                          variant="outline"
+                          className="w-full"
+                          onClick={() => setAmount(value)}
+                          data-testid={`button-quick-${value}`}
+                        >
+                          ₹{value}
+                        </Button>
+                      </motion.div>
+                    ))}
                   </div>
-                  <Button
-                    className="w-full"
-                    onClick={handleAddMoney}
-                    disabled={!amount || parseFloat(amount) <= 0}
-                    data-testid="button-confirm-add-money"
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
-                    Add Money
-                  </Button>
-                </div>
+                    <Button
+                      className="w-full"
+                      onClick={handleAddMoney}
+                      disabled={!amount || parseFloat(amount) <= 0}
+                      data-testid="button-confirm-add-money"
+                    >
+                      Add Money
+                    </Button>
+                  </motion.div>
+                </motion.div>
               </DialogContent>
             </Dialog>
           </motion.div>
 
           <motion.div
+            className="transactions-container"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}

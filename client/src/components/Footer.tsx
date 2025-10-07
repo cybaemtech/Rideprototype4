@@ -90,9 +90,9 @@ export default function Footer() {
               ].map((link) => (
                 <motion.li key={link.href} whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
                   <Link href={link.href}>
-                    <a className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    <span className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
                       {link.label}
-                    </a>
+                    </span>
                   </Link>
                 </motion.li>
               ))}
@@ -109,9 +109,9 @@ export default function Footer() {
               ].map((link) => (
                 <motion.li key={link.href} whileHover={{ x: 5 }} transition={{ duration: 0.2 }}>
                   <Link href={link.href}>
-                    <a className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    <span className="text-sm text-muted-foreground hover:text-primary transition-colors cursor-pointer">
                       {link.label}
-                    </a>
+                    </span>
                   </Link>
                 </motion.li>
               ))}

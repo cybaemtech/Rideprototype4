@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import GSAPHeroSection from "@/components/GSAPHeroSection";
+import AdvancedHeroSection from "@/components/AdvancedHeroSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import SafetyFeatures from "@/components/SafetyFeatures";
 import ReferralBanner from "@/components/ReferralBanner";
@@ -11,7 +11,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1">
-        <GSAPHeroSection />
+        <AdvancedHeroSection />
         <FeaturesSection />
         <SafetyFeatures />
         <div className="container mx-auto px-4 py-8">
